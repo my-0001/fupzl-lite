@@ -557,6 +557,8 @@ async def _ensure_logged_in(
     if browser_state == "proof_failed":
         browser_state = "cookie_invalid"
     _emit_login_probe(recorder, slot_alias, "bootstrap", browser_state)
+    if await _browser_rejected_login_cookie(main_page, browser_state):
+        return "cookie_invalid"
     if browser_state == "ok":
         return "ok"
     if browser_state == "cf_blocked":
@@ -564,6 +566,8 @@ async def _ensure_logged_in(
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
         _emit_login_probe(recorder, slot_alias, "bootstrap-cf-retry", browser_state)
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -573,6 +577,8 @@ async def _ensure_logged_in(
         browser_state = await _require_authenticated_login_proof(main_page, slot_cookies, browser_state)
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -580,6 +586,8 @@ async def _ensure_logged_in(
             if browser_state == "proof_failed":
                 browser_state = "cookie_invalid"
             _emit_login_probe(recorder, slot_alias, "rate-limit-cf-retry", browser_state)
+            if await _browser_rejected_login_cookie(main_page, browser_state):
+                return "cookie_invalid"
             if browser_state == "ok":
                 return "ok"
             if browser_state == "cf_blocked":
@@ -595,6 +603,8 @@ async def _ensure_logged_in(
     if browser_state == "proof_failed":
         browser_state = "cookie_invalid"
     _emit_login_probe(recorder, slot_alias, "home", browser_state)
+    if await _browser_rejected_login_cookie(main_page, browser_state):
+        return "cookie_invalid"
     if browser_state == "ok":
         return "ok"
     if browser_state == "cf_blocked":
@@ -602,6 +612,8 @@ async def _ensure_logged_in(
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
         _emit_login_probe(recorder, slot_alias, "home-cf-retry", browser_state)
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -611,6 +623,8 @@ async def _ensure_logged_in(
         browser_state = await _require_authenticated_login_proof(main_page, slot_cookies, browser_state)
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -618,6 +632,8 @@ async def _ensure_logged_in(
             if browser_state == "proof_failed":
                 browser_state = "cookie_invalid"
             _emit_login_probe(recorder, slot_alias, "home-rate-limit-cf-retry", browser_state)
+            if await _browser_rejected_login_cookie(main_page, browser_state):
+                return "cookie_invalid"
             if browser_state == "ok":
                 return "ok"
             if browser_state == "cf_blocked":
@@ -633,6 +649,8 @@ async def _ensure_logged_in(
     if browser_state == "proof_failed":
         browser_state = "cookie_invalid"
     _emit_login_probe(recorder, slot_alias, "login-page", browser_state)
+    if await _browser_rejected_login_cookie(main_page, browser_state):
+        return "cookie_invalid"
     if browser_state == "ok":
         return "ok"
     if browser_state == "cf_blocked":
@@ -640,6 +658,8 @@ async def _ensure_logged_in(
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
         _emit_login_probe(recorder, slot_alias, "login-page-cf-retry", browser_state)
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -649,6 +669,8 @@ async def _ensure_logged_in(
         browser_state = await _require_authenticated_login_proof(main_page, slot_cookies, browser_state)
         if browser_state == "proof_failed":
             browser_state = "cookie_invalid"
+        if await _browser_rejected_login_cookie(main_page, browser_state):
+            return "cookie_invalid"
         if browser_state == "ok":
             return "ok"
         if browser_state == "cf_blocked":
@@ -656,6 +678,8 @@ async def _ensure_logged_in(
             if browser_state == "proof_failed":
                 browser_state = "cookie_invalid"
             _emit_login_probe(recorder, slot_alias, "login-page-rate-limit-cf-retry", browser_state)
+            if await _browser_rejected_login_cookie(main_page, browser_state):
+                return "cookie_invalid"
             if browser_state == "ok":
                 return "ok"
             if browser_state == "cf_blocked":
@@ -687,6 +711,8 @@ async def _ensure_logged_in(
             browser_state = await _require_authenticated_login_proof(main_page, slot_cookies, browser_state)
             if browser_state == "proof_failed":
                 browser_state = "cookie_invalid"
+            if await _browser_rejected_login_cookie(main_page, browser_state):
+                return "cookie_invalid"
             if browser_state == "ok":
                 return "ok"
             if browser_state == "cf_blocked":
@@ -694,6 +720,8 @@ async def _ensure_logged_in(
                 if browser_state == "proof_failed":
                     browser_state = "cookie_invalid"
                 _emit_login_probe(recorder, slot_alias, "http-rate-limit-cf-retry", browser_state)
+                if await _browser_rejected_login_cookie(main_page, browser_state):
+                    return "cookie_invalid"
                 if browser_state == "ok":
                     return "ok"
                 if browser_state == "cf_blocked":
@@ -734,6 +762,13 @@ async def _ensure_logged_in(
         return "cf_blocked"
 
     return "cookie_invalid"
+
+
+async def _browser_rejected_login_cookie(page, state: str) -> bool:
+    """Return True when the browser has proof that the supplied login cookie was cleared."""
+    if state != "cookie_invalid":
+        return False
+    return not await _browser_has_login_cookie(page)
 
 
 def _emit_login_probe(
