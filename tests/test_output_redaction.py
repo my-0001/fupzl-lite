@@ -95,6 +95,22 @@ def test_non_ascii_username_redacted_after_json_serialization(monkeypatch):
     assert REDACTED_USERNAME in out
 
 
+def test_volatile_session_cookies_are_redacted_too():
+    from litefupzl.oneshot.redaction import mask_cookie
+
+    text = redact_text(
+        "header: _t=durable-value; _forum_session=session-value; cf_clearance=clearance-value"
+    )
+
+    assert "_t=<redacted>" in text
+    assert "_forum_session=<redacted>" in text
+    assert "cf_clearance=<redacted>" in text
+    for value in ("durable-value", "session-value", "clearance-value"):
+        assert value not in text
+
+    assert mask_cookie("cf_clearance=clearance-value") == "cf_clearance=<redacted>"
+
+
 def test_load_oneshot_env_installs_output_guard(monkeypatch):
     from litefupzl.oneshot import env_loader
 

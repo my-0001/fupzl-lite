@@ -11,7 +11,12 @@ from dataclasses import dataclass
 
 from litefupzl.utils import normalize_cookie_value
 
-COOKIE_PATTERN = re.compile(r"(?i)(_t=)([^;,\s]+)")
+# Cookie names whose raw values must never reach public logs. `_t` is the
+# durable login credential; `_forum_session` and `cf_clearance` are bound to the
+# session that issued them but still authenticate it, so they are masked too.
+SENSITIVE_COOKIE_NAMES = ("_t", "_forum_session", "cf_clearance")
+_COOKIE_NAME_GROUP = "|".join(re.escape(name) for name in SENSITIVE_COOKIE_NAMES)
+COOKIE_PATTERN = re.compile(rf"(?i)((?:{_COOKIE_NAME_GROUP})=)([^;,\s]+)")
 URL_PATTERN = re.compile(r"https?://[^\s]+")
 USER_PATH_PATTERN = re.compile(r"/u/[A-Za-z0-9_\-]+")
 TOPIC_PATH_PATTERN = re.compile(r"/t/[^/\s]+/\d+")
